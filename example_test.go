@@ -6,7 +6,7 @@ import (
 	gen "github.com/nasa9084/go-genutils"
 )
 
-func ExampleImportsSingleImport() {
+func ExampleImports_singleImport() {
 	pkgs := []string{"fmt"}
 	if err := gen.Imports(os.Stdout, pkgs); err != nil {
 		// some error handling
