@@ -1,7 +1,6 @@
 package gen_test
 
 import (
-	"bytes"
 	"testing"
 
 	gen "github.com/nasa9084/go-genutils"
@@ -30,11 +29,7 @@ func TestImports(t *testing.T) {
 		},
 	}
 	for _, c := range candidates {
-		var buf bytes.Buffer
-		if err := gen.Imports(&buf, c.pkgs); err != nil {
-			t.Fatal(err)
-		}
-		output := buf.String()
+		output := gen.NewImports(c.pkgs).String()
 		if output != c.expect {
 			t.Errorf("%s != %s", output, c.expect)
 			return

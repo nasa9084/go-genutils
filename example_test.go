@@ -1,16 +1,15 @@
 package gen_test
 
 import (
-	"os"
+	"fmt"
 
 	gen "github.com/nasa9084/go-genutils"
 )
 
 func ExampleImports_singleImport() {
 	pkgs := []string{"fmt"}
-	if err := gen.Imports(os.Stdout, pkgs); err != nil {
-		// some error handling
-	}
+	imports := gen.NewImports(pkgs)
+	fmt.Print(imports.String())
 	// Output:
 	//
 	// import "fmt"
@@ -21,9 +20,8 @@ func ExampleImports() {
 		"fmt",
 		"net/http",
 	}
-	if err := gen.Imports(os.Stdout, pkgs); err != nil {
-		// some error handling
-	}
+	imports := gen.NewImports(pkgs)
+	fmt.Print(imports.String())
 	// Output:
 	//
 	// import (
