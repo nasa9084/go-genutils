@@ -8,6 +8,7 @@ import (
 	"go/format"
 	"go/parser"
 	"go/token"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -114,9 +115,14 @@ func (s Struct) String() string {
 func (field Field) String() string {
 	var buf strings.Builder
 	fmt.Fprintf(&buf, "%s %s", field.Name, field.Type)
+	var tagKeys []string
+	for k := range field.Tags {
+		tagKeys = append(tagKeys, k)
+	}
+	sort.Strings(tagKeys)
 	var tags []string
-	for k, v := range field.Tags {
-		tags = append(tags, fmt.Sprintf("%s: %s", k, strconv.Quote(v)))
+	for _, k := range tagKeys {
+		tags = append(tags, fmt.Sprintf("%s: %s", k, strconv.Quote(field.Tags[k])))
 	}
 	if len(tags) > 0 {
 		fmt.Fprintf(&buf, " `%s`", strings.Join(tags, " "))
