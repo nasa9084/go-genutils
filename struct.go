@@ -8,6 +8,7 @@ import (
 	"go/format"
 	"go/parser"
 	"go/token"
+	"strconv"
 	"strings"
 )
 
@@ -15,7 +16,7 @@ import (
 type Struct struct {
 	DocComment string
 	Name       string
-	Fields     []Field
+	Fields     Fields
 }
 
 // Field represents a field of struct.
@@ -24,6 +25,9 @@ type Field struct {
 	Type string
 	Tags map[string]string
 }
+
+// Fields is a list of Fields.
+type Fields []Field
 
 // LoadStructsFromFile load struct types from file.
 func LoadStructsFromFile(filename string) ([]Struct, error) {
@@ -97,20 +101,35 @@ func (s Struct) String() string {
 		}
 	}
 	fmt.Fprintf(&buf, "type %s struct {", s.Name)
-	for _, f := range s.Fields {
-		fmt.Fprintf(&buf, "\n%s %s", f.Name, f.Type)
-		var tags []string
-		for k, v := range f.Tags {
-			tags = append(tags, fmt.Sprintf(`%s:"%s"`, k, v))
-		}
-		if len(tags) > 0 {
-			fmt.Fprintf(&buf, " `%s`", strings.Join(tags, " "))
-		}
-	}
+	fmt.Fprint(&buf, s.Fields.String())
 	fmt.Fprint(&buf, "\n}")
 	src, err := format.Source(buf.Bytes())
 	if err != nil {
 		panic(err)
 	}
 	return string(src)
+}
+
+// String returns a struct field line as string.
+func (field Field) String() string {
+	var buf strings.Builder
+	fmt.Fprintf(&buf, "%s %s", field.Name, field.Type)
+	var tags []string
+	for k, v := range field.Tags {
+		tags = append(tags, fmt.Sprintf("%s: %s", k, strconv.Quote(v)))
+	}
+	if len(tags) > 0 {
+		fmt.Fprintf(&buf, " `%s`", strings.Join(tags, " "))
+	}
+	return buf.String()
+
+}
+
+// String returns a struct field lines as string.
+func (fields Fields) String() string {
+	var buf strings.Builder
+	for _, f := range fields {
+		buf.WriteString("\n" + f.String())
+	}
+	return buf.String()
 }
