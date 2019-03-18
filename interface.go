@@ -119,16 +119,7 @@ func (iface Interface) String() string {
 	}
 	fmt.Fprintf(&buf, "type %s interface {", iface.Name)
 	for _, method := range iface.Methods {
-		fmt.Fprintf(&buf, "\n%s(%s)", method.Name, method.Params.String())
-		switch len(method.Results) {
-		case 0:
-			continue
-		case 1:
-			fmt.Fprintf(&buf, " %s", method.Results.String())
-		case 2:
-			fmt.Fprintf(&buf, " (%s)", method.Results.String())
-		}
-
+		fmt.Fprint(&buf, method.String())
 	}
 	fmt.Fprint(&buf, "\n}")
 	src, err := format.Source(buf.Bytes())
@@ -136,6 +127,17 @@ func (iface Interface) String() string {
 		panic(err)
 	}
 	return string(src)
+}
+
+func (method Method) String() string {
+	var buf strings.Builder
+	fmt.Fprintf(&buf, "\n%s(%s)", method.Name, method.Params.String())
+	if len(method.Results) == 1 {
+		fmt.Fprintf(&buf, " %s", method.Results.String())
+	} else if len(method.Results) > 1 {
+		fmt.Fprintf(&buf, " (%s)", method.Results.String())
+	}
+	return buf.String()
 }
 
 func (param Param) String() string {
