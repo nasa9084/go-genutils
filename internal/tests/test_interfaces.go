@@ -1,6 +1,8 @@
 package test
 
+import "context"
+
 type Anything interface {
 	Foo(hoge string, fuga bool) error
-	Bar(baz, qux string) (int, error)
+	Bar(ctx context.Context, baz, qux string) (int, error)
 }

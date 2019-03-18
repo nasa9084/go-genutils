@@ -84,6 +84,8 @@ func NewInterface(comment, name string, iface *ast.InterfaceType) Interface {
 				param := Param{}
 				if t, ok := p.Type.(*ast.Ident); ok {
 					param.Type = t.Name
+				} else if t, ok := p.Type.(*ast.SelectorExpr); ok {
+					param.Type = t.X.(*ast.Ident).Name + "." + t.Sel.Name
 				}
 				for _, name := range p.Names {
 					param.Name = name.Name
