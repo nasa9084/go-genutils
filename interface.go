@@ -37,7 +37,7 @@ type Result struct {
 }
 type Results []Result
 
-func LoadInterfaceFromFile(filename string) ([]Interface, error) {
+func LoadInterfacesFromFile(filename string) ([]Interface, error) {
 	f, err := parser.ParseFile(token.NewFileSet(), filename, nil, parser.ParseComments)
 	if err != nil {
 		return nil, err
