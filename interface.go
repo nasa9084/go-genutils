@@ -82,9 +82,15 @@ func NewInterface(comment, name string, iface *ast.InterfaceType) Interface {
 		if fn, ok := af.Type.(*ast.FuncType); ok {
 			for _, p := range fn.Params.List {
 				param := Param{}
-				if t, ok := p.Type.(*ast.Ident); ok {
+				if t, ok := p.Type.(*ast.Ident); ok { // primitive
 					param.Type = t.Name
-				} else if t, ok := p.Type.(*ast.SelectorExpr); ok {
+				} else if t, ok := p.Type.(*ast.StarExpr); ok { // pointer
+					if typ, ok := t.X.(*ast.Ident); ok { // pointer of primitive
+						param.Type = "*" + typ.Name
+					} else if typ, ok := t.X.(*ast.SelectorExpr); ok { // pointer of pkg.type
+						param.Type = "*" + typ.X.(*ast.Ident).Name + "." + typ.Sel.Name
+					}
+				} else if t, ok := p.Type.(*ast.SelectorExpr); ok { // pkg.type
 					param.Type = t.X.(*ast.Ident).Name + "." + t.Sel.Name
 				}
 				for _, name := range p.Names {
