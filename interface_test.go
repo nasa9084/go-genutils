@@ -44,6 +44,11 @@ func TestInterface(t *testing.T) {
 		t.Errorf("%s != *string", m1.Params[0].Type)
 		return
 	}
+	m2 := i.Methods[1]
+	if m2.Results[0].Type != "*Bar" {
+		t.Errorf("%s != *Bar", m2.Results[0].Type)
+		return
+	}
 	// need more tests
 	t.Log(i)
 }

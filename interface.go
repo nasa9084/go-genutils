@@ -106,8 +106,16 @@ func NewInterface(comment, name string, iface *ast.InterfaceType) Interface {
 				if len(r.Names) != 0 {
 					result.Name = r.Names[0].Name
 				}
-				if t, ok := r.Type.(*ast.Ident); ok {
+				if t, ok := r.Type.(*ast.Ident); ok { // primitive
 					result.Type = t.Name
+				} else if t, ok := r.Type.(*ast.StarExpr); ok { // pointer
+					if typ, ok := t.X.(*ast.Ident); ok { // pointer of primitive
+						result.Type = "*" + typ.Name
+					} else if typ, ok := t.X.(*ast.SelectorExpr); ok { // pointer of pkg.type
+						result.Type = "*" + typ.X.(*ast.Ident).Name + "." + typ.Sel.Name
+					}
+				} else if t, ok := r.Type.(*ast.SelectorExpr); ok { // pkg.type
+					result.Type = t.X.(*ast.Ident).Name + "." + t.Sel.Name
 				}
 				m.Results = append(m.Results, result)
 			}
