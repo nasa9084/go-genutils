@@ -81,19 +81,8 @@ func NewInterface(comment, name string, iface *ast.InterfaceType) Interface {
 		}
 		if fn, ok := af.Type.(*ast.FuncType); ok {
 			for _, p := range fn.Params.List {
-				param := Param{}
-				switch t := p.Type.(type) { // need generarize param and result
-				case *ast.Ident: // primitive
-					param.Type = t.Name
-				case *ast.StarExpr: // pointer
-					switch typ := t.X.(type) {
-					case *ast.Ident: // pointer of primitive
-						param.Type = "*" + typ.Name
-					case *ast.SelectorExpr: // pointer of pkg.type
-						param.Type = "*" + typ.X.(*ast.Ident).Name + "." + typ.Sel.Name
-					}
-				case *ast.SelectorExpr: // pkg.type
-					param.Type = t.X.(*ast.Ident).Name + "." + t.Sel.Name
+				param := Param{
+					Type: getTypeFromField(p),
 				}
 				for _, name := range p.Names {
 					param.Name = name.Name
@@ -104,22 +93,11 @@ func NewInterface(comment, name string, iface *ast.InterfaceType) Interface {
 				}
 			}
 			for _, r := range fn.Results.List {
-				result := Result{}
+				result := Result{
+					Type: getTypeFromField(r),
+				}
 				if len(r.Names) != 0 {
 					result.Name = r.Names[0].Name
-				}
-				switch t := r.Type.(type) { // need generarize param and result
-				case *ast.Ident: // primitive
-					result.Type = t.Name
-				case *ast.StarExpr: // pointer
-					switch typ := t.X.(type) {
-					case *ast.Ident: // pointer of primitive
-						result.Type = "*" + typ.Name
-					case *ast.SelectorExpr: // pointer of pkg.type
-						result.Type = "*" + typ.X.(*ast.Ident).Name + "." + typ.Sel.Name
-					}
-				case *ast.SelectorExpr: // pkg.type
-					result.Type = t.X.(*ast.Ident).Name + "." + t.Sel.Name
 				}
 				m.Results = append(m.Results, result)
 			}
@@ -127,6 +105,23 @@ func NewInterface(comment, name string, iface *ast.InterfaceType) Interface {
 		i.Methods = append(i.Methods, m)
 	}
 	return i
+}
+
+func getTypeFromField(f *ast.Field) string {
+	switch t := f.Type.(type) { // need generarize param and result
+	case *ast.Ident: // primitive
+		return t.Name
+	case *ast.StarExpr: // pointer
+		switch typ := t.X.(type) {
+		case *ast.Ident: // pointer of primitive
+			return "*" + typ.Name
+		case *ast.SelectorExpr: // pointer of pkg.type
+			return "*" + typ.X.(*ast.Ident).Name + "." + typ.Sel.Name
+		}
+	case *ast.SelectorExpr: // pkg.type
+		return t.X.(*ast.Ident).Name + "." + t.Sel.Name
+	}
+	return ""
 }
 
 func (iface Interface) String() string {
