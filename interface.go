@@ -82,7 +82,7 @@ func NewInterface(comment, name string, iface *ast.InterfaceType) Interface {
 		if fn, ok := af.Type.(*ast.FuncType); ok {
 			for _, p := range fn.Params.List {
 				param := Param{
-					Type: getTypeFromField(p),
+					Type: getType(p.Type),
 				}
 				for _, name := range p.Names {
 					param.Name = name.Name
@@ -94,7 +94,7 @@ func NewInterface(comment, name string, iface *ast.InterfaceType) Interface {
 			}
 			for _, r := range fn.Results.List {
 				result := Result{
-					Type: getTypeFromField(r),
+					Type: getType(r.Type),
 				}
 				if len(r.Names) != 0 {
 					result.Name = r.Names[0].Name
@@ -107,8 +107,8 @@ func NewInterface(comment, name string, iface *ast.InterfaceType) Interface {
 	return i
 }
 
-func getTypeFromField(f *ast.Field) string {
-	switch t := f.Type.(type) { // need generarize param and result
+func getType(expr ast.Expr) string {
+	switch t := expr.(type) { // need generarize param and result
 	case *ast.Ident: // primitive
 		return t.Name
 	case *ast.StarExpr: // pointer
@@ -120,6 +120,12 @@ func getTypeFromField(f *ast.Field) string {
 		}
 	case *ast.SelectorExpr: // pkg.type
 		return t.X.(*ast.Ident).Name + "." + t.Sel.Name
+	case *ast.ArrayType: // array
+		var len string
+		if t.Len != nil {
+			len = t.Len.(*ast.BasicLit).Value
+		}
+		return "[" + len + "]" + getType(t.Elt)
 	}
 	return ""
 }
