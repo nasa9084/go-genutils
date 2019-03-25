@@ -82,15 +82,17 @@ func NewInterface(comment, name string, iface *ast.InterfaceType) Interface {
 		if fn, ok := af.Type.(*ast.FuncType); ok {
 			for _, p := range fn.Params.List {
 				param := Param{}
-				if t, ok := p.Type.(*ast.Ident); ok { // primitive
+				switch t := p.Type.(type) { // need generarize param and result
+				case *ast.Ident: // primitive
 					param.Type = t.Name
-				} else if t, ok := p.Type.(*ast.StarExpr); ok { // pointer
-					if typ, ok := t.X.(*ast.Ident); ok { // pointer of primitive
+				case *ast.StarExpr: // pointer
+					switch typ := t.X.(type) {
+					case *ast.Ident: // pointer of primitive
 						param.Type = "*" + typ.Name
-					} else if typ, ok := t.X.(*ast.SelectorExpr); ok { // pointer of pkg.type
+					case *ast.SelectorExpr: // pointer of pkg.type
 						param.Type = "*" + typ.X.(*ast.Ident).Name + "." + typ.Sel.Name
 					}
-				} else if t, ok := p.Type.(*ast.SelectorExpr); ok { // pkg.type
+				case *ast.SelectorExpr: // pkg.type
 					param.Type = t.X.(*ast.Ident).Name + "." + t.Sel.Name
 				}
 				for _, name := range p.Names {
@@ -106,15 +108,17 @@ func NewInterface(comment, name string, iface *ast.InterfaceType) Interface {
 				if len(r.Names) != 0 {
 					result.Name = r.Names[0].Name
 				}
-				if t, ok := r.Type.(*ast.Ident); ok { // primitive
+				switch t := r.Type.(type) { // need generarize param and result
+				case *ast.Ident: // primitive
 					result.Type = t.Name
-				} else if t, ok := r.Type.(*ast.StarExpr); ok { // pointer
-					if typ, ok := t.X.(*ast.Ident); ok { // pointer of primitive
+				case *ast.StarExpr: // pointer
+					switch typ := t.X.(type) {
+					case *ast.Ident: // pointer of primitive
 						result.Type = "*" + typ.Name
-					} else if typ, ok := t.X.(*ast.SelectorExpr); ok { // pointer of pkg.type
+					case *ast.SelectorExpr: // pointer of pkg.type
 						result.Type = "*" + typ.X.(*ast.Ident).Name + "." + typ.Sel.Name
 					}
-				} else if t, ok := r.Type.(*ast.SelectorExpr); ok { // pkg.type
+				case *ast.SelectorExpr: // pkg.type
 					result.Type = t.X.(*ast.Ident).Name + "." + t.Sel.Name
 				}
 				m.Results = append(m.Results, result)
