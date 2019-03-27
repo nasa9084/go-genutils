@@ -80,26 +80,30 @@ func NewInterface(comment, name string, iface *ast.InterfaceType) Interface {
 			m.Name = af.Names[0].Name
 		}
 		if fn, ok := af.Type.(*ast.FuncType); ok {
-			for _, p := range fn.Params.List {
-				param := Param{
-					Type: getType(p.Type),
-				}
-				for _, name := range p.Names {
-					param.Name = name.Name
-					m.Params = append(m.Params, param)
-				}
-				if len(p.Names) == 0 {
-					m.Params = append(m.Params, param)
+			if fn.Params != nil {
+				for _, p := range fn.Params.List {
+					param := Param{
+						Type: getType(p.Type),
+					}
+					for _, name := range p.Names {
+						param.Name = name.Name
+						m.Params = append(m.Params, param)
+					}
+					if len(p.Names) == 0 {
+						m.Params = append(m.Params, param)
+					}
 				}
 			}
-			for _, r := range fn.Results.List {
-				result := Result{
-					Type: getType(r.Type),
+			if fn.Results != nil {
+				for _, r := range fn.Results.List {
+					result := Result{
+						Type: getType(r.Type),
+					}
+					if len(r.Names) != 0 {
+						result.Name = r.Names[0].Name
+					}
+					m.Results = append(m.Results, result)
 				}
-				if len(r.Names) != 0 {
-					result.Name = r.Names[0].Name
-				}
-				m.Results = append(m.Results, result)
 			}
 		}
 		i.Methods = append(i.Methods, m)
