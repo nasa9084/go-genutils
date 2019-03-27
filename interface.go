@@ -8,6 +8,9 @@ import (
 	"go/format"
 	"go/parser"
 	"go/token"
+	"log"
+	"os"
+	"reflect"
 	"strings"
 )
 
@@ -130,6 +133,13 @@ func getType(expr ast.Expr) string {
 			len = t.Len.(*ast.BasicLit).Value
 		}
 		return "[" + len + "]" + getType(t.Elt)
+	case *ast.InterfaceType: // interface{}
+		return "interface{}"
+	case *ast.Ellipsis: // ...type
+		return "..." + getType(t.Elt)
+	default:
+		log.Printf("unknown expr type: %s", reflect.TypeOf(expr))
+		os.Exit(1)
 	}
 	return ""
 }

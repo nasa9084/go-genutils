@@ -10,3 +10,7 @@ type Anything interface {
 	Foo(hoge *string, fuga bool) ([]*Foo, error)
 	Bar(ctx context.Context, baz, qux string) (*Bar, error)
 }
+
+type Nothing interface {
+	Baz(args ...interface{})
+}
