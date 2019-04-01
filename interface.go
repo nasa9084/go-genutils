@@ -17,6 +17,7 @@ import (
 type Interface struct {
 	DocComment string
 	Name       string
+	Interfaces []Interface
 	Methods    Methods
 }
 
@@ -77,10 +78,16 @@ func NewInterface(comment, name string, iface *ast.InterfaceType) Interface {
 		DocComment: comment,
 		Name:       name,
 	}
+	if iface == nil {
+		return i
+	}
 	for _, af := range iface.Methods.List {
 		m := Method{}
 		if len(af.Names) != 0 {
 			m.Name = af.Names[0].Name
+		} else {
+			i.Interfaces = append(i.Interfaces, NewInterface("", af.Type.(*ast.Ident).Name, nil))
+			continue
 		}
 		if fn, ok := af.Type.(*ast.FuncType); ok {
 			if fn.Params != nil {

@@ -59,11 +59,11 @@ func TestInterface(t *testing.T) {
 	}
 
 	i = ifaces[1]
-	if len(i.Methods) != 1 {
+	if len(i.Methods) != 2 {
 		t.Errorf("len(iface.Fields) is invalid: %d != 2", len(i.Methods))
 		return
 	}
-	m := i.Methods[0]
+	m := i.Methods[1]
 	if m.Name != "Baz" {
 		t.Errorf("%s != Baz", m.Name)
 		return

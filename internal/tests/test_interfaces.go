@@ -12,5 +12,6 @@ type Anything interface {
 }
 
 type Nothing interface {
+	Anything
 	Baz(args ...interface{})
 }
