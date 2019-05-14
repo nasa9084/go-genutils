@@ -8,6 +8,7 @@ import (
 	"go/format"
 	"go/parser"
 	"go/token"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -22,9 +23,10 @@ type Struct struct {
 
 // Field represents a field of struct.
 type Field struct {
-	Name string
-	Type string
-	Tags map[string]string
+	Comment string
+	Name    string
+	Type    string
+	Tags    map[string]string
 }
 
 // Fields is a list of Fields.
@@ -71,16 +73,28 @@ func NewStruct(comment, name string, st *ast.StructType) Struct {
 		Name:       name,
 	}
 	for _, af := range st.Fields.List {
-		f := Field{
-			Tags: map[string]string{},
+		f := Field{}
+		if af.Doc != nil {
+			f.Comment = strings.Trim(af.Doc.Text(), " 	")
 		}
 		if len(af.Names) != 0 {
 			f.Name = af.Names[0].Name
 		}
-		if t, ok := af.Type.(*ast.Ident); ok {
+		switch t := af.Type.(type) {
+		case *ast.Ident:
 			f.Type = t.Name
+		case *ast.StructType:
+			s := NewStruct("", "", t)
+			var buf strings.Builder
+			buf.WriteString("struct {")
+			buf.WriteString(s.Fields.String())
+			buf.WriteString("\n}")
+			f.Type = buf.String()
+		default:
+			panic(reflect.TypeOf(t))
 		}
 		if af.Tag != nil {
+			f.Tags = map[string]string{}
 			tags := strings.Fields(strings.Trim(af.Tag.Value, "`"))
 			for _, tag := range tags {
 				t := strings.Split(tag, ":")
@@ -114,6 +128,15 @@ func (s Struct) String() string {
 // String returns a struct field line as string.
 func (field Field) String() string {
 	var buf strings.Builder
+	if field.Comment != "" {
+		if !strings.HasSuffix(field.Comment, "\n") {
+			field.Comment += "\n"
+		}
+		lines := strings.SplitAfter(field.Comment, "\n")
+		for _, line := range lines[:len(lines)-1] {
+			fmt.Fprintf(&buf, "// %s", line)
+		}
+	}
 	fmt.Fprintf(&buf, "%s %s", field.Name, field.Type)
 	var tagKeys []string
 	for k := range field.Tags {
