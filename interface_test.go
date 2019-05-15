@@ -13,67 +13,143 @@ func TestInterface(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ifaces, err := gen.LoadInterfaces(f)
+	got, err := gen.LoadInterfaces(f)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if len(ifaces) != 2 {
-		t.Errorf("len(ifaces) is not expected valud: %d != 1", len(ifaces))
-		return
+	expected := []gen.Interface{
+		gen.Interface{
+			Name: "Anything",
+			Methods: gen.Methods{
+				gen.Method{
+					Name: "Foo",
+					Params: gen.Params{
+						gen.Param{
+							Name: "hoge",
+							Type: "*string",
+						},
+						gen.Param{
+							Name: "fuga",
+							Type: "bool",
+						},
+					},
+					Results: gen.Results{
+						gen.Result{
+							Type: "[]*Foo",
+						},
+						gen.Result{
+							Type: "error",
+						},
+					},
+				},
+				gen.Method{
+					Name: "Bar",
+					Params: gen.Params{
+						gen.Param{
+							Name: "ctx",
+							Type: "context.Context",
+						},
+						gen.Param{
+							Name: "baz",
+							Type: "string",
+						},
+						gen.Param{
+							Name: "qux",
+							Type: "string",
+						},
+					},
+					Results: gen.Results{
+						gen.Result{
+							Type: "*Bar",
+						},
+						gen.Result{
+							Type: "error",
+						},
+					},
+				},
+			},
+		},
+		gen.Interface{
+			Name: "Nothing",
+			Interfaces: []gen.Interface{
+				gen.Interface{
+					Name: "Anything",
+				},
+			},
+			Methods: gen.Methods{
+				gen.Method{
+					Name: "Baz",
+					Params: gen.Params{
+						gen.Param{
+							Name: "args",
+							Type: "...interface{}",
+						},
+					},
+				},
+			},
+		},
 	}
-	i := ifaces[0]
-	if i.Name != "Anything" {
-		t.Errorf("%s != Anything", i.Name)
-		return
-	}
-	if len(i.Methods) != 2 {
-		t.Errorf("len(iface.Fields) is invalid: %d != 2", len(i.Methods))
-		return
-	}
-	m1 := i.Methods[0]
-	if m1.Name != "Foo" {
-		t.Errorf("%s != Foo", m1.Name)
-		return
-	}
-	if len(m1.Params) != 2 {
-		t.Errorf("%d != 2", len(m1.Params))
-		return
-	}
-	if m1.Params[0].Type != "*string" {
-		t.Errorf("%s != *string", m1.Params[0].Type)
-		return
-	}
-	if len(m1.Results) != 2 {
-		t.Errorf("%d != 2", len(m1.Results))
-		return
-	}
-	if m1.Results[0].Type != "[]*Foo" {
-		t.Errorf("%s != []*Foo", m1.Results[0].Type)
-		return
-	}
-	m2 := i.Methods[1]
-	if m2.Results[0].Type != "*Bar" {
-		t.Errorf("%s != *Bar", m2.Results[0].Type)
-		return
-	}
+	assertEqualInterfaceLists(t, got, expected)
+}
 
-	i = ifaces[1]
-	if len(i.Methods) != 2 {
-		t.Errorf("len(iface.Fields) is invalid: %d != 2", len(i.Methods))
+func assertEqualInterfaceLists(t *testing.T, got []gen.Interface, expected []gen.Interface) {
+	if len(got) != len(expected) {
+		t.Errorf("length of interfaces invalid: %d != %d", len(got), len(expected))
 		return
 	}
-	m := i.Methods[1]
-	if m.Name != "Baz" {
-		t.Errorf("%s != Baz", m.Name)
+	for i := range got {
+		assertEqualInterfaces(t, got[i], expected[i])
+	}
+}
+
+func assertEqualInterfaces(t *testing.T, got gen.Interface, expected gen.Interface) {
+	if got.DocComment != expected.DocComment {
+		t.Errorf("%s != %s", got.DocComment, expected.DocComment)
 		return
 	}
-	if len(m.Params) != 1 {
-		t.Errorf("%d != 1", len(m.Params))
+	if got.Name != expected.Name {
+		t.Errorf("%s != %s", got.Name, expected.Name)
 		return
 	}
-	if m.Params[0].Type != "...interface{}" {
-		t.Errorf("%s != ...interface{}", m.Params[0].Type)
+	assertEqualInterfaceLists(t, got.Interfaces, expected.Interfaces)
+	if len(got.Methods) != len(expected.Methods) {
+		t.Errorf("length of methods in %s invalid: %d != %d", got.Name, len(got.Methods), len(expected.Methods))
 		return
+	}
+	for j := range got.Methods {
+		gm := got.Methods[j]
+		em := expected.Methods[j]
+		if gm.Name != em.Name {
+			t.Errorf("%s != %s", gm.Name, em.Name)
+			return
+		}
+		if len(gm.Params) != len(em.Params) {
+			t.Errorf("length of parameters in %s is invalid: %d != %d", gm.Name, len(gm.Params), len(em.Params))
+			return
+		}
+		for k := range gm.Params {
+			if gm.Params[k].Name != em.Params[k].Name {
+				t.Errorf("%s != %s", gm.Params[k].Name, em.Params[k].Name)
+			}
+			if gm.Params[k].Type != em.Params[k].Type {
+				t.Errorf("%s != %s", gm.Params[k].Type, em.Params[k].Type)
+				return
+			}
+		}
+		if len(gm.Results) != len(em.Results) {
+			t.Errorf("length of results in %s is invalid: %d != %d", gm.Name, len(gm.Results), len(em.Results))
+			return
+		}
+		for k := range gm.Results {
+			if gm.Results[k].Name != em.Results[k].Name {
+				t.Errorf("%s != %s", gm.Results[k].Name, em.Results[k].Name)
+				return
+			}
+			if gm.Results[k].Type != em.Results[k].Type {
+				t.Errorf("%s != %s", gm.Results[k].Type, em.Results[k].Type)
+				return
+			}
+		}
 	}
 }
