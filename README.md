@@ -8,20 +8,4 @@ Package `gen` provides some utility functions for go code generation.
 
 ## SYNOPSIS
 
-``` go
-func ExampleImports() {
-	pkgs := []string{
-		"fmt",
-		"net/http",
-	}
-	if err := gen.Imports(os.Stdout, pkgs); err != nil {
-		// some error handling
-	}
-	// Output:
-	//
-	// import (
-	// "fmt"
-	// "net/http"
-	// )
-}
-```
+see [example_test.go](example_test.go).
