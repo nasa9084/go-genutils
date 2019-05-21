@@ -17,18 +17,21 @@ func TestLoadPackagesFromPath(t *testing.T) {
 			Name: "test",
 			Structs: []gen.Struct{
 				gen.Struct{
-					DocComment: "Something is a test struct.\nsecond line of doc comment.\n",
-					Name:       "Something",
+					DocComments: []string{
+						"Something is a test struct.",
+						"second line of doc comment.",
+					},
+					Name: "Something",
 					Fields: gen.Fields{
 						gen.Field{
-							Comment: "Foo is something foo\n",
-							Name:    "Foo",
-							Type:    "string",
+							Comments: []string{"Foo is something foo"},
+							Name:     "Foo",
+							Type:     "string",
 						},
 						gen.Field{
-							Comment: "Bar is not a bar\nbut bar\n",
-							Name:    "Bar",
-							Type:    "string",
+							Comments: []string{"Bar is not a bar", "but bar"},
+							Name:     "Bar",
+							Type:     "string",
 							Tags: map[string]string{
 								"json": "barbar",
 							},
@@ -38,9 +41,9 @@ func TestLoadPackagesFromPath(t *testing.T) {
 							Type: "bool",
 						},
 						gen.Field{
-							Comment: "qux is qux\n",
-							Name:    "Qux",
-							Type:    "int",
+							Comments: []string{"qux is qux"},
+							Name:     "Qux",
+							Type:     "int",
 						},
 					},
 				},

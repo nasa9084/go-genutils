@@ -21,18 +21,21 @@ func TestLoadStructs(t *testing.T) {
 	}
 	expected := []gen.Struct{
 		gen.Struct{
-			DocComment: "Something is a test struct.\nsecond line of doc comment.\n",
-			Name:       "Something",
+			DocComments: []string{
+				"Something is a test struct.",
+				"second line of doc comment.",
+			},
+			Name: "Something",
 			Fields: gen.Fields{
 				gen.Field{
-					Comment: "Foo is something foo\n",
-					Name:    "Foo",
-					Type:    "string",
+					Comments: []string{"Foo is something foo"},
+					Name:     "Foo",
+					Type:     "string",
 				},
 				gen.Field{
-					Comment: "Bar is not a bar\nbut bar\n",
-					Name:    "Bar",
-					Type:    "string",
+					Comments: []string{"Bar is not a bar", "but bar"},
+					Name:     "Bar",
+					Type:     "string",
 					Tags: map[string]string{
 						"json": "barbar",
 					},
@@ -42,9 +45,9 @@ func TestLoadStructs(t *testing.T) {
 					Type: "bool",
 				},
 				gen.Field{
-					Comment: "qux is qux\n",
-					Name:    "Qux",
-					Type:    "int",
+					Comments: []string{"qux is qux"},
+					Name:     "Qux",
+					Type:     "int",
 				},
 			},
 		},
@@ -81,29 +84,30 @@ func TestLoadStructs(t *testing.T) {
 		return
 	}
 	for i := range got {
-		if got[i].DocComment != expected[i].DocComment {
-			t.Errorf("%s != %s", got[i].DocComment, expected[i].DocComment)
+		if !reflect.DeepEqual(got[i].DocComments, expected[i].DocComments) {
+			t.Errorf("doc comments not expected: %+v != %+v", got[i].DocComments, expected[i].DocComments)
 			return
 		}
 		if got[i].Name != expected[i].Name {
-			t.Errorf("%s != %s", got[i].Name, expected[i].DocComment)
+			t.Errorf("name not expected: %s != %s", got[i].Name, expected[i].Name)
 			return
 		}
 		if len(got[i].Fields) != len(expected[i].Fields) {
-			t.Errorf("length of fields invalid: %d != %d", len(got[i].Fields), len(expected[i].Fields))
+			t.Errorf("length of fields not expected: %d != %d", len(got[i].Fields), len(expected[i].Fields))
 			return
 		}
 		for j := range got[i].Fields {
-			if got[i].Fields[j].Comment != expected[i].Fields[j].Comment {
-				t.Errorf("%s != %s", got[i].Fields[j].Comment, expected[i].Fields[j].Comment)
+			if !reflect.DeepEqual(got[i].Fields[j].Comments, expected[i].Fields[j].Comments) {
+				t.Log(got[i].Fields[j].Name)
+				t.Errorf("comments not expected: %+v != %+v", got[i].Fields[j].Comments, expected[i].Fields[j].Comments)
 				return
 			}
 			if got[i].Fields[j].Type != expected[i].Fields[j].Type {
-				t.Errorf("%s != %s", got[i].Fields[j].Type, expected[i].Fields[j].Type)
+				t.Errorf("type not expected: %s != %s", got[i].Fields[j].Type, expected[i].Fields[j].Type)
 				return
 			}
 			if !reflect.DeepEqual(got[i].Fields[j].Tags, expected[i].Fields[j].Tags) {
-				t.Errorf("%v != %v", got[i].Fields[j].Tags, expected[i].Fields[j].Tags)
+				t.Errorf("tags not expected: %v != %v", got[i].Fields[j].Tags, expected[i].Fields[j].Tags)
 				return
 			}
 		}

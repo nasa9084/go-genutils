@@ -16,17 +16,17 @@ import (
 
 // Struct represents a struct type.
 type Struct struct {
-	DocComment string
-	Name       string
-	Fields     Fields
+	DocComments []string
+	Name        string
+	Fields      Fields
 }
 
 // Field represents a field of struct.
 type Field struct {
-	Comment string
-	Name    string
-	Type    string
-	Tags    map[string]string
+	Comments []string
+	Name     string
+	Type     string
+	Tags     map[string]string
 }
 
 // Fields is a list of Fields.
@@ -67,15 +67,17 @@ func LoadStructs(f *ast.File) ([]Struct, error) {
 }
 
 // NewStruct creates a new Struct object from *ast.StructType.
-func NewStruct(comment, name string, st *ast.StructType) Struct {
+func NewStruct(comment string, name string, st *ast.StructType) Struct {
 	s := Struct{
-		DocComment: comment,
-		Name:       name,
+		Name: name,
+	}
+	if comment != "" {
+		s.DocComments = strings.FieldsFunc(comment, func(r rune) bool { return r == '\n' })
 	}
 	for _, af := range st.Fields.List {
 		f := Field{}
 		if af.Doc != nil {
-			f.Comment = strings.Trim(af.Doc.Text(), " 	")
+			f.Comments = strings.FieldsFunc(strings.Trim(af.Doc.Text(), " 	"), func(r rune) bool { return r == '\n' })
 		}
 		if len(af.Names) != 0 {
 			f.Name = af.Names[0].Name
@@ -109,10 +111,11 @@ func NewStruct(comment, name string, st *ast.StructType) Struct {
 // String returns formatted source-form struct type definition.
 func (s Struct) String() string {
 	var buf bytes.Buffer
-	if s.DocComment != "" {
-		lines := strings.SplitAfter(s.DocComment, "\n")
-		for _, line := range lines[:len(lines)-1] {
-			fmt.Fprintf(&buf, "// %s", line)
+	if s.DocComments != nil && len(s.DocComments) != 0 {
+		for _, line := range s.DocComments {
+			if line != "" {
+				fmt.Fprintf(&buf, "// %s\n", line)
+			}
 		}
 	}
 	fmt.Fprintf(&buf, "type %s struct {", s.Name)
@@ -123,18 +126,17 @@ func (s Struct) String() string {
 		panic(err)
 	}
 	return string(src)
+	return buf.String()
 }
 
 // String returns a struct field line as string.
 func (field Field) String() string {
 	var buf strings.Builder
-	if field.Comment != "" {
-		if !strings.HasSuffix(field.Comment, "\n") {
-			field.Comment += "\n"
-		}
-		lines := strings.SplitAfter(field.Comment, "\n")
-		for _, line := range lines[:len(lines)-1] {
-			fmt.Fprintf(&buf, "// %s", line)
+	if field.Comments != nil {
+		for _, line := range field.Comments {
+			if line != "" {
+				fmt.Fprintf(&buf, "// %s\n", line)
+			}
 		}
 	}
 	fmt.Fprintf(&buf, "%s %s", field.Name, field.Type)
