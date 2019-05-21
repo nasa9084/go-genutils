@@ -158,17 +158,23 @@ func TestLoadPackagesFromPath(t *testing.T) {
 	for i := range pkgs {
 		got := pkgs[i]
 		want := expected[i]
-		if got.Name != want.Name {
-			t.Errorf("name not expected: %s != %s", got.Name, want.Name)
-			return
-		}
-		if !reflect.DeepEqual(got.Structs, want.Structs) {
-			t.Errorf("structs not expected: %+v != %+v", got.Structs, want.Structs)
-			return
-		}
-		if !reflect.DeepEqual(got.Interfaces, want.Interfaces) {
-			t.Errorf("interfaces not expected: %+v != %+v", got.Interfaces, want.Interfaces)
-			return
-		}
+		t.Run("Name", func(t *testing.T) {
+			if got.Name != want.Name {
+				t.Errorf("name not expected: %s != %s", got.Name, want.Name)
+				return
+			}
+		})
+		t.Run("Structs", func(t *testing.T) {
+			if !reflect.DeepEqual(got.Structs, want.Structs) {
+				t.Errorf("structs not expected: %+v != %+v", got.Structs, want.Structs)
+				return
+			}
+		})
+		t.Run("Interfaces", func(t *testing.T) {
+			if !reflect.DeepEqual(got.Interfaces, want.Interfaces) {
+				t.Errorf("interfaces not expected: %+v != %+v", got.Interfaces, want.Interfaces)
+				return
+			}
+		})
 	}
 }

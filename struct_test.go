@@ -4,6 +4,7 @@ import (
 	"go/parser"
 	"go/token"
 	"reflect"
+	"strconv"
 	"testing"
 
 	gen "github.com/nasa9084/go-genutils"
@@ -79,38 +80,56 @@ func TestLoadStructs(t *testing.T) {
 			},
 		},
 	}
-	if len(got) != len(expected) {
-		t.Errorf("length of structs invalid: %d != %d", len(got), len(expected))
-		return
-	}
+	t.Run("len(Structs)", func(t *testing.T) {
+		if len(got) != len(expected) {
+			t.Errorf("length of structs invalid: %d != %d", len(got), len(expected))
+			return
+		}
+	})
 	for i := range got {
-		if !reflect.DeepEqual(got[i].DocComments, expected[i].DocComments) {
-			t.Errorf("doc comments not expected: %+v != %+v", got[i].DocComments, expected[i].DocComments)
-			return
-		}
-		if got[i].Name != expected[i].Name {
-			t.Errorf("name not expected: %s != %s", got[i].Name, expected[i].Name)
-			return
-		}
-		if len(got[i].Fields) != len(expected[i].Fields) {
-			t.Errorf("length of fields not expected: %d != %d", len(got[i].Fields), len(expected[i].Fields))
-			return
-		}
-		for j := range got[i].Fields {
-			if !reflect.DeepEqual(got[i].Fields[j].Comments, expected[i].Fields[j].Comments) {
-				t.Log(got[i].Fields[j].Name)
-				t.Errorf("comments not expected: %+v != %+v", got[i].Fields[j].Comments, expected[i].Fields[j].Comments)
-				return
+		t.Run("Structs["+strconv.Itoa(i)+"]", func(t *testing.T) {
+			t.Run("DocComments", func(t *testing.T) {
+				if !reflect.DeepEqual(got[i].DocComments, expected[i].DocComments) {
+					t.Errorf("doc comments not expected: %+v != %+v", got[i].DocComments, expected[i].DocComments)
+					return
+				}
+			})
+			t.Run("Name", func(t *testing.T) {
+				if got[i].Name != expected[i].Name {
+					t.Errorf("name not expected: %s != %s", got[i].Name, expected[i].Name)
+					return
+				}
+			})
+			t.Run("len(Fields)", func(t *testing.T) {
+				if len(got[i].Fields) != len(expected[i].Fields) {
+					t.Errorf("length of fields not expected: %d != %d", len(got[i].Fields), len(expected[i].Fields))
+					return
+				}
+			})
+			for j := range got[i].Fields {
+				t.Run("Fields["+strconv.Itoa(j)+"]", func(t *testing.T) {
+					t.Run("Comments", func(t *testing.T) {
+						if !reflect.DeepEqual(got[i].Fields[j].Comments, expected[i].Fields[j].Comments) {
+							t.Log(got[i].Fields[j].Name)
+							t.Errorf("comments not expected: %+v != %+v", got[i].Fields[j].Comments, expected[i].Fields[j].Comments)
+							return
+						}
+					})
+					t.Run("Type", func(t *testing.T) {
+						if got[i].Fields[j].Type != expected[i].Fields[j].Type {
+							t.Errorf("type not expected: %s != %s", got[i].Fields[j].Type, expected[i].Fields[j].Type)
+							return
+						}
+					})
+					t.Run("Tags", func(t *testing.T) {
+						if !reflect.DeepEqual(got[i].Fields[j].Tags, expected[i].Fields[j].Tags) {
+							t.Errorf("tags not expected: %v != %v", got[i].Fields[j].Tags, expected[i].Fields[j].Tags)
+							return
+						}
+					})
+				})
 			}
-			if got[i].Fields[j].Type != expected[i].Fields[j].Type {
-				t.Errorf("type not expected: %s != %s", got[i].Fields[j].Type, expected[i].Fields[j].Type)
-				return
-			}
-			if !reflect.DeepEqual(got[i].Fields[j].Tags, expected[i].Fields[j].Tags) {
-				t.Errorf("tags not expected: %v != %v", got[i].Fields[j].Tags, expected[i].Fields[j].Tags)
-				return
-			}
-		}
+		})
 	}
 	candidatesStr := []struct {
 		expected string

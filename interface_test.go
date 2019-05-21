@@ -3,6 +3,7 @@ package gen_test
 import (
 	"go/parser"
 	"go/token"
+	"strconv"
 	"testing"
 
 	gen "github.com/nasa9084/go-genutils"
@@ -94,62 +95,92 @@ func TestInterface(t *testing.T) {
 }
 
 func assertEqualInterfaceLists(t *testing.T, got []gen.Interface, expected []gen.Interface) {
-	if len(got) != len(expected) {
-		t.Errorf("length of interfaces invalid: %d != %d", len(got), len(expected))
-		return
-	}
+	t.Run("len(Interfaces)", func(t *testing.T) {
+		if len(got) != len(expected) {
+			t.Errorf("length of interfaces invalid: %d != %d", len(got), len(expected))
+			return
+		}
+	})
 	for i := range got {
-		assertEqualInterfaces(t, got[i], expected[i])
+		t.Run("Interfaces["+strconv.Itoa(i)+"]", func(t *testing.T) {
+			assertEqualInterfaces(t, got[i], expected[i])
+		})
 	}
 }
 
 func assertEqualInterfaces(t *testing.T, got gen.Interface, expected gen.Interface) {
-	if got.DocComment != expected.DocComment {
-		t.Errorf("%s != %s", got.DocComment, expected.DocComment)
-		return
-	}
-	if got.Name != expected.Name {
-		t.Errorf("%s != %s", got.Name, expected.Name)
-		return
-	}
+	t.Run("DocComment", func(t *testing.T) {
+		if got.DocComment != expected.DocComment {
+			t.Errorf("%s != %s", got.DocComment, expected.DocComment)
+			return
+		}
+	})
+	t.Run("Name", func(t *testing.T) {
+		if got.Name != expected.Name {
+			t.Errorf("%s != %s", got.Name, expected.Name)
+			return
+		}
+	})
 	assertEqualInterfaceLists(t, got.Interfaces, expected.Interfaces)
-	if len(got.Methods) != len(expected.Methods) {
-		t.Errorf("length of methods in %s invalid: %d != %d", got.Name, len(got.Methods), len(expected.Methods))
-		return
-	}
+	t.Run("len(Methods)", func(t *testing.T) {
+		if len(got.Methods) != len(expected.Methods) {
+			t.Errorf("length of methods in %s invalid: %d != %d", got.Name, len(got.Methods), len(expected.Methods))
+			return
+		}
+	})
 	for j := range got.Methods {
-		gm := got.Methods[j]
-		em := expected.Methods[j]
-		if gm.Name != em.Name {
-			t.Errorf("%s != %s", gm.Name, em.Name)
-			return
-		}
-		if len(gm.Params) != len(em.Params) {
-			t.Errorf("length of parameters in %s is invalid: %d != %d", gm.Name, len(gm.Params), len(em.Params))
-			return
-		}
-		for k := range gm.Params {
-			if gm.Params[k].Name != em.Params[k].Name {
-				t.Errorf("%s != %s", gm.Params[k].Name, em.Params[k].Name)
+		t.Run("Methods["+strconv.Itoa(j)+"]", func(t *testing.T) {
+			gm := got.Methods[j]
+			em := expected.Methods[j]
+			t.Run("Method.Name", func(t *testing.T) {
+				if gm.Name != em.Name {
+					t.Errorf("%s != %s", gm.Name, em.Name)
+					return
+				}
+			})
+			t.Run("len(Params)", func(t *testing.T) {
+				if len(gm.Params) != len(em.Params) {
+					t.Errorf("length of parameters in %s is invalid: %d != %d", gm.Name, len(gm.Params), len(em.Params))
+					return
+				}
+			})
+			for k := range gm.Params {
+				t.Run("Params["+strconv.Itoa(k)+"]", func(t *testing.T) {
+					t.Run("Param.Name", func(t *testing.T) {
+						if gm.Params[k].Name != em.Params[k].Name {
+							t.Errorf("%s != %s", gm.Params[k].Name, em.Params[k].Name)
+						}
+					})
+					t.Run("Param.Type", func(t *testing.T) {
+						if gm.Params[k].Type != em.Params[k].Type {
+							t.Errorf("%s != %s", gm.Params[k].Type, em.Params[k].Type)
+							return
+						}
+					})
+				})
 			}
-			if gm.Params[k].Type != em.Params[k].Type {
-				t.Errorf("%s != %s", gm.Params[k].Type, em.Params[k].Type)
-				return
+			t.Run("len(Results)", func(t *testing.T) {
+				if len(gm.Results) != len(em.Results) {
+					t.Errorf("length of results in %s is invalid: %d != %d", gm.Name, len(gm.Results), len(em.Results))
+					return
+				}
+			})
+			for k := range gm.Results {
+				t.Run("Results["+strconv.Itoa(k)+"]", func(t *testing.T) {
+					t.Run("Result.Name", func(t *testing.T) {
+						if gm.Results[k].Name != em.Results[k].Name {
+							t.Errorf("%s != %s", gm.Results[k].Name, em.Results[k].Name)
+							return
+						}
+					})
+					t.Run("Result.Type", func(t *testing.T) {
+						if gm.Results[k].Type != em.Results[k].Type {
+							t.Errorf("%s != %s", gm.Results[k].Type, em.Results[k].Type)
+							return
+						}
+					})
+				})
 			}
-		}
-		if len(gm.Results) != len(em.Results) {
-			t.Errorf("length of results in %s is invalid: %d != %d", gm.Name, len(gm.Results), len(em.Results))
-			return
-		}
-		for k := range gm.Results {
-			if gm.Results[k].Name != em.Results[k].Name {
-				t.Errorf("%s != %s", gm.Results[k].Name, em.Results[k].Name)
-				return
-			}
-			if gm.Results[k].Type != em.Results[k].Type {
-				t.Errorf("%s != %s", gm.Results[k].Type, em.Results[k].Type)
-				return
-			}
-		}
+		})
 	}
 }
