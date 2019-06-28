@@ -29,3 +29,15 @@ func ExampleImports() {
 	// "net/http"
 	// )
 }
+
+func ExampleLoadStructs() {
+	structs, _ := gen.LoadStructsFromFile("./internal/tests/test_structs.go")
+	for _, s := range structs {
+		fmt.Println(s.Name)
+	}
+	// Output:
+	// Something
+	// Nested
+	// Parent
+	// Child
+}

@@ -1,6 +1,7 @@
 package gen
 
 import (
+	"sort"
 	"strings"
 )
 
@@ -47,6 +48,17 @@ func (imps Imports) String() string {
 		var buf strings.Builder
 		buf.Grow(32 * len(imps)) // 32 is nearly equal len of 1 line (avg) from heuristic
 		buf.WriteString("\n\nimport (")
+		sort.Slice(imps, func(i, j int) bool {
+			a := imps[i].ImportPath
+			if imps[i].PackageName != "" {
+				a = imps[i].PackageName
+			}
+			b := imps[j].ImportPath
+			if imps[j].PackageName != "" {
+				b = imps[j].PackageName
+			}
+			return a < b
+		})
 		for _, imp := range imps {
 			buf.WriteString("\n")
 			if imp.PackageName != "" {
