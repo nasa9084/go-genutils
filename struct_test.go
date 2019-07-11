@@ -134,7 +134,7 @@ func TestLoadStructs(t *testing.T) {
 	candidatesStr := []struct {
 		expected string
 	}{
-		{"// Something is a test struct.\n// second line of doc comment.\ntype Something struct {\n	// Foo is something foo\n	Foo string\n	// Bar is not a bar\n	// but bar\n	Bar string `json: \"barbar\"`\n	Baz bool\n	// qux is qux\n	Qux int\n}"},
+		{"// Something is a test struct.\n// second line of doc comment.\ntype Something struct {\n	// Foo is something foo\n	Foo string\n	// Bar is not a bar\n	// but bar\n	Bar string `json:\"barbar\"`\n	Baz bool\n	// qux is qux\n	Qux int\n}"},
 		{`type Nested struct {
 	Foo struct {
 		Bar string
