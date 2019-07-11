@@ -131,6 +131,9 @@ func (s Struct) String() string {
 
 // String returns a struct field line as string.
 func (field Field) String() string {
+	if field.Name == "" && field.Type == "" {
+		return ""
+	}
 	var buf strings.Builder
 	if field.Comments != nil {
 		for _, line := range field.Comments {
