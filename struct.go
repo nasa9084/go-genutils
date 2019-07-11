@@ -147,7 +147,7 @@ func (field Field) String() string {
 	sort.Strings(tagKeys)
 	var tags []string
 	for _, k := range tagKeys {
-		tags = append(tags, fmt.Sprintf("%s: %s", k, strconv.Quote(field.Tags[k])))
+		tags = append(tags, fmt.Sprintf("%s:%s", k, strconv.Quote(field.Tags[k])))
 	}
 	if len(tags) > 0 {
 		fmt.Fprintf(&buf, " `%s`", strings.Join(tags, " "))
