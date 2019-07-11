@@ -156,3 +156,46 @@ func TestLoadStructs(t *testing.T) {
 		}
 	}
 }
+
+func TestFieldString(t *testing.T) {
+	tests := []struct {
+		got  string
+		want string
+	}{
+		{
+			got:  gen.Field{}.String(),
+			want: "",
+		},
+		{
+			got: gen.Field{
+				Name: "Foo",
+				Type: "string",
+			}.String(),
+			want: "Foo string",
+		},
+		{
+			got: gen.Field{
+				Name: "Foo",
+				Type: "int",
+				Tags: map[string]string{"json": "foo"},
+			}.String(),
+			want: "Foo int `json:\"foo\"`",
+		},
+		{
+			got: gen.Field{
+				Name:     "Foo",
+				Type:     "float64",
+				Comments: []string{"Foo is example."},
+			}.String(),
+			want: "// Foo is example.\nFoo float64",
+		},
+	}
+	for i, tt := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			if tt.got != tt.want {
+				t.Errorf("unexpected:\n  got:  %s\n  want: %s", tt.got, tt.want)
+				return
+			}
+		})
+	}
+}
