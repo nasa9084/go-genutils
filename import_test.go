@@ -1,11 +1,27 @@
-package gen_test
+package gen
 
 import (
 	"strconv"
 	"testing"
-
-	gen "github.com/nasa9084/go-genutils"
 )
+
+func TestImportsSplit(t *testing.T) {
+	imports := NewImports([]string{
+		"net/http",
+		"github.com/nasa9084/go-genutils/gen",
+		"io/ioutil",
+		"github.com/foo/bar",
+		"fmt",
+		"github.com/nasa9084/go-openapi/openapi",
+	})
+	imports.BasePath = "github.com/nasa9084/go-genutils"
+	got := imports.String()
+	want := "\n\nimport (\n\"fmt\"\n\"io/ioutil\"\n\"net/http\"\n\n\"github.com/foo/bar\"\n\"github.com/nasa9084/go-openapi/openapi\"\n\n\"github.com/nasa9084/go-genutils/gen\"\n)"
+	if got != want {
+		t.Errorf("%s != %s", got, want)
+		return
+	}
+}
 
 func TestImports(t *testing.T) {
 	candidates := []struct {
@@ -35,7 +51,7 @@ func TestImports(t *testing.T) {
 	}
 	for i, c := range candidates {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			output := gen.NewImports(c.pkgs).String()
+			output := NewImports(c.pkgs).String()
 			if output != c.expect {
 				t.Errorf("%s != %s", output, c.expect)
 				return
@@ -50,16 +66,20 @@ func TestImportsIsSorted(t *testing.T) {
 		want string
 	}{
 		{
-			got: gen.Imports{
-				gen.Import{ImportPath: "sync"},
-				gen.Import{ImportPath: "encoding/json"},
+			got: Imports{
+				imports: []Import{
+					{ImportPath: "sync"},
+					{ImportPath: "encoding/json"},
+				},
 			}.String(),
 			want: "\n\nimport (\n\"encoding/json\"\n\"sync\"\n)",
 		},
 		{
-			got: gen.Imports{
-				gen.Import{ImportPath: "log", PackageName: "stdlog"},
-				gen.Import{ImportPath: "encoding/json"},
+			got: Imports{
+				imports: []Import{
+					{ImportPath: "log", PackageName: "stdlog"},
+					{ImportPath: "encoding/json"},
+				},
 			}.String(),
 			want: "\n\nimport (\n\"encoding/json\"\nstdlog \"log\"\n)",
 		},
