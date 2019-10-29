@@ -40,6 +40,13 @@ func NewImports(pkgs []string) Imports {
 	return imps
 }
 
+func (imps Imports) Import(pkgName, importPath string) {
+	imps.imports = append(imps.imports, Import{
+		PackageName: pkgName,
+		ImportPath:  importPath,
+	})
+}
+
 // String generates an `import` declaration states.
 // If the number of imports is 1, this is same as Import.String().
 // Returned string is not formatted. If you need, use format.Source() to format returned code..
